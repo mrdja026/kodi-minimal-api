@@ -1,0 +1,34 @@
+# .NET build artifacts
+bin/
+obj/
+
+# IDE
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JetBrains Rider
+.idea/
+*.sln.iml
+
+# dotnet test results
+**/*.trx
+**/*.log
+
+# NuGet
+**/packages/
+*.nupkg
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# opencode
+../.opencode/
+openspec/changes/archive/
+
+# launch settings (user-specific)
+Properties/launchSettings.json

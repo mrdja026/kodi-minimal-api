@@ -1,0 +1,11 @@
+@kodi_minmal_api_wrapper_HostAddress = http://localhost:5149
+
+GET {{kodi_minmal_api_wrapper_HostAddress}}/todos/
+Accept: application/json
+
+###
+
+GET {{kodi_minmal_api_wrapper_HostAddress}}/todos/1
+Accept: application/json
+
+###

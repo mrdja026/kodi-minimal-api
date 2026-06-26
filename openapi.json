@@ -1,0 +1,264 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "kodi-minmal-api-wrapper | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:5149"
+    }
+  ],
+  "paths": {
+    "/api/volume": {
+      "post": {
+        "tags": [
+          "kodi-minmal-api-wrapper"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CommandValue"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/files/directory": {
+      "post": {
+        "tags": [
+          "kodi-minmal-api-wrapper"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FilesDirectoryRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/system/properties": {
+      "post": {
+        "tags": [
+          "kodi-minmal-api-wrapper"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemPropertiesRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/system/shutdown": {
+      "post": {
+        "tags": [
+          "kodi-minmal-api-wrapper"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/system/reboot": {
+      "post": {
+        "tags": [
+          "kodi-minmal-api-wrapper"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SystemActionRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "CommandValue": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/CommandValueVolumeUp"
+          },
+          {
+            "$ref": "#/components/schemas/CommandValueVolumeDown"
+          },
+          {
+            "$ref": "#/components/schemas/CommandValueVolumeGet"
+          },
+          {
+            "$ref": "#/components/schemas/CommandValueVolumeSet"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "UP": "#/components/schemas/CommandValueVolumeUp",
+            "DOWN": "#/components/schemas/CommandValueVolumeDown",
+            "GET": "#/components/schemas/CommandValueVolumeGet",
+            "SET": "#/components/schemas/CommandValueVolumeSet"
+          }
+        }
+      },
+      "CommandValueVolumeDown": {
+        "required": [
+          "level"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "DOWN"
+            ],
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CommandValueVolumeGet": {
+        "properties": {
+          "type": {
+            "enum": [
+              "GET"
+            ],
+            "type": "string"
+          }
+        }
+      },
+      "CommandValueVolumeSet": {
+        "required": [
+          "level"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "SET"
+            ],
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "CommandValueVolumeUp": {
+        "required": [
+          "level"
+        ],
+        "properties": {
+          "type": {
+            "enum": [
+              "UP"
+            ],
+            "type": "string"
+          },
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "FilesDirectoryRequest": {
+        "required": [
+          "directory",
+          "media"
+        ],
+        "type": "object",
+        "properties": {
+          "directory": {
+            "type": "string"
+          },
+          "media": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "SystemActionRequest": {
+        "required": [
+          "confirm"
+        ],
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "boolean"
+          }
+        }
+      },
+      "SystemPropertiesRequest": {
+        "required": [
+          "properties"
+        ],
+        "type": "object",
+        "properties": {
+          "properties": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "kodi-minmal-api-wrapper"
+    }
+  ]
+}
