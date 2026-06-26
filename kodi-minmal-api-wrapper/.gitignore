@@ -26,9 +26,11 @@ obj/
 Thumbs.db
 .DS_Store
 
-# opencode
-../.opencode/
-openspec/changes/archive/
+# opencode (AI tooling config, not for version control)
+.opencode/
+
+# OpenSpec archives
+**/openspec/changes/archive/
 
 # launch settings (user-specific)
-Properties/launchSettings.json
+**/Properties/launchSettings.json

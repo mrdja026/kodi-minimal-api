@@ -33,6 +33,7 @@ app.MapOpenApi();
 app.MapVolumeEndpoints();
 app.MapFileEndpoints();
 app.MapSystemEndpoints();
+app.MapPlayerEndpoints();
 
 app.Run();
 
@@ -41,6 +42,9 @@ app.Run();
 [JsonSerializable(typeof(VolumeSet))]
 [JsonSerializable(typeof(VolumeUp))]
 [JsonSerializable(typeof(VolumeDown))]
+[JsonSerializable(typeof(PlayerPlay))]
+[JsonSerializable(typeof(PlayerPause))]
+[JsonSerializable(typeof(PlayerStop))]
 [JsonSerializable(typeof(FilesDirectoryRequest))]
 [JsonSerializable(typeof(SystemPropertiesRequest))]
 [JsonSerializable(typeof(SystemActionRequest))]

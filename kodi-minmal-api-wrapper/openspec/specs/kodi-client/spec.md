@@ -1,5 +1,8 @@
-## ADDED Requirements
+# kodi-client Specification
 
+## Purpose
+TBD - created by archiving change add-kodi-proxy-domains. Update Purpose after archive.
+## Requirements
 ### Requirement: IKodiService Interface
 The system SHALL define an `IKodiService` interface as the DI contract for communicating with Kodi over JSON-RPC 2.0. All domain endpoint handlers SHALL depend on this interface.
 
@@ -43,3 +46,4 @@ The system SHALL provide shared `KodiRpcRequest` and `KodiRpcResponse<T>` models
 - **WHEN** a response is received from Kodi
 - **THEN** the envelope SHALL contain either a `result` field of type `T` or an `error` field
 - **THEN** the service SHALL surface the result or error in a typed manner
+

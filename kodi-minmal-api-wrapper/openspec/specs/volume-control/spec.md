@@ -1,5 +1,8 @@
-## ADDED Requirements
+# volume-control Specification
 
+## Purpose
+TBD - created by archiving change add-kodi-proxy-domains. Update Purpose after archive.
+## Requirements
 ### Requirement: Volume Get
 The proxy SHALL expose a `VolumeGet` command that retrieves the current volume from Kodi and returns it.
 
@@ -45,3 +48,4 @@ The `POST /api/volume` endpoint SHALL use JSON polymorphic deserialization with 
 #### Scenario: Unknown command type
 - **WHEN** a `POST /api/volume` request is sent with an unrecognized `type` value
 - **THEN** the proxy returns a 400 Bad Request
+

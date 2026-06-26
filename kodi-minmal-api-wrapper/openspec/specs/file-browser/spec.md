@@ -1,5 +1,8 @@
-## ADDED Requirements
+# file-browser Specification
 
+## Purpose
+TBD - created by archiving change add-kodi-proxy-domains. Update Purpose after archive.
+## Requirements
 ### Requirement: Files.GetDirectory
 The proxy SHALL expose a `POST /api/files/directory` endpoint that lists the contents of a given directory on the Kodi host.
 
@@ -19,3 +22,4 @@ The `directory` parameter SHALL be a non-empty string. The `media` parameter SHA
 #### Scenario: Default media type
 - **WHEN** a `POST /api/files/directory` request is sent with only `directory`
 - **THEN** the proxy SHALL use `"media": "files"` as the default
+

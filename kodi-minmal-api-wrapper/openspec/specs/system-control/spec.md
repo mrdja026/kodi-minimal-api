@@ -1,5 +1,8 @@
-## ADDED Requirements
+# system-control Specification
 
+## Purpose
+TBD - created by archiving change add-kodi-proxy-domains. Update Purpose after archive.
+## Requirements
 ### Requirement: System Get Properties
 The proxy SHALL expose a `POST /api/system/properties` endpoint that retrieves Kodi system properties.
 
@@ -39,3 +42,4 @@ System shutdown and reboot endpoints SHALL require an explicit confirmation fiel
 #### Scenario: Shutdown without confirmation
 - **WHEN** a `POST /api/system/shutdown` request is sent without `confirm: true`
 - **THEN** the proxy returns a 400 Bad Request with a message requiring explicit confirmation
+
