@@ -55,6 +55,20 @@ public static class PlayerEndpoints
                     PlayerStop => await kodi.SendAsync("Player.Stop",
                         new JsonObject { ["playerid"] = playerId }),
 
+                    PlayerSeekForward s => await kodi.SendAsync("Player.Seek",
+                        new JsonObject
+                        {
+                            ["playerid"] = playerId,
+                            ["value"] = new JsonObject { ["seconds"] = s.Seconds }
+                        }),
+
+                    PlayerSeekBackward s => await kodi.SendAsync("Player.Seek",
+                        new JsonObject
+                        {
+                            ["playerid"] = playerId,
+                            ["value"] = new JsonObject { ["seconds"] = -s.Seconds }
+                        }),
+
                     _ => throw new InvalidOperationException("Unknown command type")
                 };
 

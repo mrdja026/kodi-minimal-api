@@ -7,12 +7,12 @@ A lightweight .NET 9 proxy that translates HTTP REST calls into Kodi JSON-RPC 2.
 | Endpoint                 | Method | Status                               |
 | ------------------------ | ------ | ------------------------------------ |
 | `/api/volume`            | POST   | Working                              |
-| `/api/player`            | POST   | Working                              |
+| `/api/player`            | POST   | Working — PLAY, PAUSE, STOP, SEEK_FORWARD, SEEK_BACKWARD, PLAY with file |
 | `/api/system/properties` | POST   | Working                              |
 | `/api/system/shutdown`   | POST   | Working                              |
 | `/api/system/reboot`     | POST   | Working                              |
-| `/api/movies`            | POST   | Working                              |
-| `/api/tvshows`           | POST   | Working                              |
+| `/api/movies`            | POST   | Working — LIST, SEARCH, RECENT, PLAY_MOVIE, SCAN, SEARCH_DIR            |
+| `/api/tvshows`           | POST   | Working — TV_LIST, TV_SEARCH, TV_SEASONS, TV_EPISODES, TV_RECENT, TV_PLAY_EPISODE, TV_SCAN, TV_SEARCH_DIR, TV_SEARCH_ALL |
 | `/api/files/directory`   | POST   | Implemented, depends on Kodi sources |
 | `/api/files/sources`     | POST   | Working                              |
 | `/api/debug/kodi`        | POST   | Debug passthrough                    |
@@ -27,12 +27,16 @@ Edit `appsettings.json`:
     "Host": "192.168.0.100",
     "Port": 8080,
     "Username": "kodi",
-    "Password": "1233"
+    "Password": "1233",
+    "MovieScanDirectory": "/home/mrdjan/.kodi/media/",
+    "TVScanDirectory": "/home/mrdjan/.kodi/tv/"
   }
 }
 ```
 
 The proxy listens on `http://localhost:5149` by default (configured in `Properties/launchSettings.json`).
+
+`MovieScanDirectory` and `TVScanDirectory` are optional; they are required for filesystem search commands (`SEARCH_DIR`, `TV_SEARCH_DIR`, `TV_SEARCH_ALL`). If not set, those commands return an error.
 
 ## Build & Run
 
@@ -71,6 +75,21 @@ Invoke-RestMethod -Method Post -Body '{"type":"SCAN_MOVIES"}' -ContentType "appl
 
 # Scan all sources (alias for SCAN)
 Invoke-RestMethod -Method Post -Body '{"type":"SCAN_TV"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
+
+# Seek forward 30 seconds
+Invoke-RestMethod -Method Post -Body '{"type":"SEEK_FORWARD","seconds":30}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Seek backward 30 seconds
+Invoke-RestMethod -Method Post -Body '{"type":"SEEK_BACKWARD","seconds":30}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Play a file by path
+Invoke-RestMethod -Method Post -Body '{"type":"PLAY","file":"smb://server/share/movie.mkv"}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Browse/search movie filesystem directory
+Invoke-RestMethod -Method Post -Body '{"type":"SEARCH_DIR","query":"inception"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
+
+# Recursively search TV filesystem (up to 3 levels deep)
+Invoke-RestMethod -Method Post -Body '{"type":"TV_SEARCH_ALL","query":"breaking"}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
 ```
 
 ### Volume
@@ -93,17 +112,30 @@ Invoke-RestMethod -Method Post -Body '{"type":"DOWN","level":10}' -ContentType "
 
 ### Player
 
-Maps to Kodi JSON-RPC `Player.GetActivePlayers` + `Player.PlayPause` / `Player.Stop`. Auto-detects the first active `playerid`.
+Maps to Kodi JSON-RPC `Player.GetActivePlayers` + `Player.PlayPause` / `Player.Stop` / `Player.Seek`. Auto-detects the first active `playerid`.
+
+PLAY with a `file` property uses `Player.Open` directly (no active player required). PLAY without `file` resumes the active player.
+
+SEEK_FORWARD / SEEK_BACKWARD both map to `Player.Seek` with positive or negative `seconds` (range 1–600).
 
 ```powershell
 # Play (resume playback on active player)
 Invoke-RestMethod -Method Post -Body '{"type":"PLAY"}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Play a file by path (no active player required)
+Invoke-RestMethod -Method Post -Body '{"type":"PLAY","file":"smb://server/share/movie.mkv"}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
 
 # Pause
 Invoke-RestMethod -Method Post -Body '{"type":"PAUSE"}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
 
 # Stop
 Invoke-RestMethod -Method Post -Body '{"type":"STOP"}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Seek forward 30 seconds
+Invoke-RestMethod -Method Post -Body '{"type":"SEEK_FORWARD","seconds":30}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
+
+# Seek backward 30 seconds
+Invoke-RestMethod -Method Post -Body '{"type":"SEEK_BACKWARD","seconds":30}' -ContentType "application/json" -Uri "http://localhost:5149/api/player"
 ```
 
 ### Movies
@@ -136,6 +168,15 @@ Invoke-RestMethod -Method Post -Body '{"type":"SCAN_TV"}' -ContentType "applicat
 
 # Scan a specific directory
 Invoke-RestMethod -Method Post -Body '{"type":"SCAN","directory":"/storage/.kodi/media/movies"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
+
+# Browse/search movies in filesystem under MovieScanDirectory
+Invoke-RestMethod -Method Post -Body '{"type":"SEARCH_DIR"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
+
+# Search movies in filesystem by label
+Invoke-RestMethod -Method Post -Body '{"type":"SEARCH_DIR","query":"inception"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
+
+# Browse a subdirectory within MovieScanDirectory
+Invoke-RestMethod -Method Post -Body '{"type":"SEARCH_DIR","directory":"2024/Action"}' -ContentType "application/json" -Uri "http://localhost:5149/api/movies"
 ```
 
 ### TV Shows
@@ -162,6 +203,18 @@ Invoke-RestMethod -Method Post -Body '{"type":"TV_RECENT","limit":10}' -ContentT
 
 # Play a specific episode by ID (get episodeId from EPISODES or RECENT)
 Invoke-RestMethod -Method Post -Body '{"type":"TV_PLAY_EPISODE","episodeId":456}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
+
+# Browse/search TV filesystem under TVScanDirectory
+Invoke-RestMethod -Method Post -Body '{"type":"TV_SEARCH_DIR"}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
+
+# Search TV filesystem by label
+Invoke-RestMethod -Method Post -Body '{"type":"TV_SEARCH_DIR","query":"drama"}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
+
+# Browse a subdirectory within TVScanDirectory
+Invoke-RestMethod -Method Post -Body '{"type":"TV_SEARCH_DIR","directory":"Drama"}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
+
+# Recursively search TV filesystem (up to 3 levels deep)
+Invoke-RestMethod -Method Post -Body '{"type":"TV_SEARCH_ALL","query":"breaking"}' -ContentType "application/json" -Uri "http://localhost:5149/api/tvshows"
 ```
 
 ### System
@@ -221,8 +274,10 @@ Invoke-RestMethod -Method Post -Body '{"method":"VideoLibrary.GetMovies","params
 ## Architecture
 
 - **Native AOT ready** — compiled with `PublishAot=true`, no reflection at runtime
-- **Polymorphic commands** — Volume and Player endpoints use a `type` discriminator for polymorphic JSON deserialization (e.g., `{"type":"PLAY"}`)
-- **Player auto-detection** — Player endpoint automatically queries `Player.GetActivePlayers` and uses the first active `playerid`
+- **Polymorphic commands** — All endpoints use a `type` discriminator for polymorphic JSON deserialization (e.g., `{"type":"PLAY"}`, `{"type":"SEEK_FORWARD"}`, `{"type":"SEARCH_DIR"}`)
+- **Player auto-detection** — Player endpoint automatically queries `Player.GetActivePlayers` and uses the first active `playerid`; PLAY with `file` skips detection and uses `Player.Open` directly
+- **Filesystem search** — Movies and TV endpoints include filesystem search (`SEARCH_DIR`, `TV_SEARCH_DIR`) that calls `Files.GetDirectory` under the configured scan directory with optional client-side label filtering
+- **Recursive TV search** — `TV_SEARCH_ALL` walks the TV scan directory up to 3 levels deep, collecting all matching files/folders via recursive `Files.GetDirectory` calls
 - **FluentValidation** — All requests validated with inheritance-aware validators
 - **Source-generated JSON** — `AppJsonSerializerContext` provides AOT-safe serialization via `[JsonSerializable]` attributes
 

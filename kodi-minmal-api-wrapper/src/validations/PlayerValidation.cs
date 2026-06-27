@@ -19,6 +19,22 @@ public class PlayerStopValidator : AbstractValidator<PlayerStop>
 {
 }
 
+public class PlayerSeekForwardValidator : AbstractValidator<PlayerSeekForward>
+{
+    public PlayerSeekForwardValidator()
+    {
+        RuleFor(x => x.Seconds).InclusiveBetween(1, 600);
+    }
+}
+
+public class PlayerSeekBackwardValidator : AbstractValidator<PlayerSeekBackward>
+{
+    public PlayerSeekBackwardValidator()
+    {
+        RuleFor(x => x.Seconds).InclusiveBetween(1, 600);
+    }
+}
+
 public class PlayerRequestValidator : AbstractValidator<CommandValue>
 {
     public PlayerRequestValidator()
@@ -28,6 +44,8 @@ public class PlayerRequestValidator : AbstractValidator<CommandValue>
             _ = v.Add(new PlayerPlayValidator());
             _ = v.Add(new PlayerPauseValidator());
             _ = v.Add(new PlayerStopValidator());
+            _ = v.Add(new PlayerSeekForwardValidator());
+            _ = v.Add(new PlayerSeekBackwardValidator());
         });
     }
 }

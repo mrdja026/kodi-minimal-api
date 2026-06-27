@@ -11,6 +11,8 @@ namespace KodiMinimalApi.Commands;
 [JsonDerivedType(typeof(PlayerPlay), typeDiscriminator: "PLAY")]
 [JsonDerivedType(typeof(PlayerPause), typeDiscriminator: "PAUSE")]
 [JsonDerivedType(typeof(PlayerStop), typeDiscriminator: "STOP")]
+[JsonDerivedType(typeof(PlayerSeekForward), typeDiscriminator: "SEEK_FORWARD")]
+[JsonDerivedType(typeof(PlayerSeekBackward), typeDiscriminator: "SEEK_BACKWARD")]
 [JsonDerivedType(typeof(MovieList), typeDiscriminator: "LIST")]
 [JsonDerivedType(typeof(MovieSearch), typeDiscriminator: "SEARCH")]
 [JsonDerivedType(typeof(MovieRecent), typeDiscriminator: "RECENT")]
@@ -39,6 +41,8 @@ public record VolumeSet(int Level) : CommandValue;
 public record PlayerPlay(string? File) : CommandValue;
 public record PlayerPause : CommandValue;
 public record PlayerStop : CommandValue;
+public record PlayerSeekForward(int Seconds) : CommandValue;
+public record PlayerSeekBackward(int Seconds) : CommandValue;
 
 public record MovieList(int? Start, int? End) : CommandValue;
 public record MovieSearch(string Query) : CommandValue;
