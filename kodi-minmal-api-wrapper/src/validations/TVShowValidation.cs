@@ -53,6 +53,27 @@ public class TVShowPlayEpisodeValidator : AbstractValidator<TVShowPlayEpisode>
     }
 }
 
+public class TVShowScanValidator : AbstractValidator<TVShowScan>
+{
+}
+
+public class TVShowSearchDirValidator : AbstractValidator<TVShowSearchDir>
+{
+    public TVShowSearchDirValidator()
+    {
+        When(x => x.Query is not null, () => RuleFor(x => x.Query).NotEmpty());
+        When(x => x.Directory is not null, () => RuleFor(x => x.Directory).NotEmpty());
+    }
+}
+
+public class TVSearchAllValidator : AbstractValidator<TVSearchAll>
+{
+    public TVSearchAllValidator()
+    {
+        RuleFor(x => x.Query).NotEmpty();
+    }
+}
+
 public class TVShowRequestValidator : AbstractValidator<CommandValue>
 {
     public TVShowRequestValidator()
@@ -65,6 +86,9 @@ public class TVShowRequestValidator : AbstractValidator<CommandValue>
             _ = v.Add(new TVShowEpisodesValidator());
             _ = v.Add(new TVShowRecentValidator());
             _ = v.Add(new TVShowPlayEpisodeValidator());
+            _ = v.Add(new TVShowScanValidator());
+            _ = v.Add(new TVShowSearchDirValidator());
+            _ = v.Add(new TVSearchAllValidator());
         });
     }
 }

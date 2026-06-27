@@ -24,6 +24,10 @@ namespace KodiMinimalApi.Commands;
 [JsonDerivedType(typeof(TVShowEpisodes), typeDiscriminator: "TV_EPISODES")]
 [JsonDerivedType(typeof(TVShowRecent), typeDiscriminator: "TV_RECENT")]
 [JsonDerivedType(typeof(TVShowPlayEpisode), typeDiscriminator: "TV_PLAY_EPISODE")]
+[JsonDerivedType(typeof(TVShowScan), typeDiscriminator: "TV_SCAN")]
+[JsonDerivedType(typeof(MovieSearchDir), typeDiscriminator: "SEARCH_DIR")]
+[JsonDerivedType(typeof(TVShowSearchDir), typeDiscriminator: "TV_SEARCH_DIR")]
+[JsonDerivedType(typeof(TVSearchAll), typeDiscriminator: "TV_SEARCH_ALL")]
 
 public abstract record CommandValue;
 
@@ -32,7 +36,7 @@ public record VolumeDown(int Level) : CommandValue;
 public record VolumeGet : CommandValue;
 public record VolumeSet(int Level) : CommandValue;
 
-public record PlayerPlay : CommandValue;
+public record PlayerPlay(string? File) : CommandValue;
 public record PlayerPause : CommandValue;
 public record PlayerStop : CommandValue;
 
@@ -50,3 +54,8 @@ public record TVShowSeasons(int TVShowId) : CommandValue;
 public record TVShowEpisodes(int TVShowId, int? Season) : CommandValue;
 public record TVShowRecent(int? Limit) : CommandValue;
 public record TVShowPlayEpisode(int EpisodeId) : CommandValue;
+public record TVShowScan : CommandValue;
+
+public record MovieSearchDir(string? Query, string? Directory) : CommandValue;
+public record TVShowSearchDir(string? Query, string? Directory) : CommandValue;
+public record TVSearchAll(string Query) : CommandValue;

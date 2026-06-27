@@ -57,6 +57,13 @@ public static class VolumeEndpoints
                     AppJsonSerializerContext.Default.KodiProxyError,
                     statusCode: StatusCodes.Status502BadGateway);
             }
+            catch (OperationCanceledException)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Timeout", "Request timed out. Ensure Kodi is running and reachable at the configured host/port.", 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
             catch (KodiException ex)
             {
                 return Results.Json(

@@ -4,6 +4,7 @@ using FluentValidation;
 using KodiMinimalApi.Commands;
 using KodiMinimalApi.Models;
 using KodiMinimalApi.Services;
+using Microsoft.Extensions.Options;
 using static KodiMinimalApi.Models.ErrorHelper;
 
 namespace KodiMinimalApi.Features;
@@ -17,7 +18,8 @@ public static class TVShowEndpoints
         tvshowApi.MapPost("/", async (
             CommandValue command,
             IValidator<CommandValue> validator,
-            IKodiService kodi
+            IKodiService kodi,
+            IOptions<KodiOptions> options
         ) =>
         {
             var validationResult = await validator.ValidateAsync(command);
@@ -85,6 +87,18 @@ public static class TVShowEndpoints
                             }
                         }),
 
+                    TVShowScan _ => options.Value.TVScanDirectory is string tvDir
+                        ? await ScanLibrary(kodi, tvDir)
+                        : throw new KodiException("TVScanDirectory is not configured in appsettings.json"),
+
+                    TVShowSearchDir sd => options.Value.TVScanDirectory is string tvDir
+                        ? await SearchDir(kodi, tvDir, sd.Query, sd.Directory, "video")
+                        : throw new KodiException("TVScanDirectory is not configured in appsettings.json"),
+
+                    TVSearchAll sa => options.Value.TVScanDirectory is string tvDir
+                        ? await SearchAll(kodi, tvDir, sa.Query)
+                        : throw new KodiException("TVScanDirectory is not configured in appsettings.json"),
+
                     _ => throw new InvalidOperationException("Unknown command type")
                 };
 
@@ -97,6 +111,13 @@ public static class TVShowEndpoints
                     AppJsonSerializerContext.Default.KodiProxyError,
                     statusCode: StatusCodes.Status502BadGateway);
             }
+            catch (OperationCanceledException)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Timeout", "Request timed out. Ensure Kodi is running and reachable at the configured host/port.", 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
             catch (KodiException ex)
             {
                 return Results.Json(
@@ -105,5 +126,90 @@ public static class TVShowEndpoints
                     statusCode: StatusCodes.Status502BadGateway);
             }
         });
+    }
+
+    static Task<string> ScanLibrary(IKodiService kodi, string dir) =>
+        kodi.SendAsync("VideoLibrary.Scan",
+            new JsonObject { ["showdialogs"] = false, ["directory"] = dir });
+
+    static async Task<string> SearchDir(IKodiService kodi, string baseDir, string? query, string? subDir, string media)
+    {
+        var targetDir = string.IsNullOrEmpty(subDir)
+            ? baseDir
+            : baseDir.TrimEnd('/') + "/" + subDir.TrimStart('/');
+
+        var raw = await kodi.SendAsync("Files.GetDirectory",
+            new JsonObject
+            {
+                ["directory"] = targetDir,
+                ["media"] = media
+            });
+
+        if (string.IsNullOrEmpty(query))
+            return raw;
+
+        var doc = JsonNode.Parse(raw)!.AsObject();
+        var files = doc["files"]?.AsArray();
+        if (files is null)
+            return raw;
+
+        var filtered = new JsonArray(
+            files.Where(f => f?["label"]?.GetValue<string>()?.Contains(query, StringComparison.OrdinalIgnoreCase) == true)
+                 .Select(f => f!.DeepClone())
+                 .ToArray<JsonNode?>()
+        );
+        doc["files"] = filtered;
+        return doc.ToJsonString();
+    }
+
+    static async Task<string> SearchAll(IKodiService kodi, string scanDir, string query)
+    {
+        var results = new List<JsonNode>();
+        await CollectMatching(kodi, scanDir, query, 0, 3, results);
+
+        return new JsonObject
+        {
+            ["files"] = new JsonArray(results.Select(r => r.DeepClone()).ToArray<JsonNode?>())
+        }.ToJsonString();
+    }
+
+    static async Task CollectMatching(IKodiService kodi, string dir, string query, int depth, int maxDepth, List<JsonNode> results)
+    {
+        if (depth > maxDepth)
+            return;
+
+        string raw;
+        try
+        {
+            raw = await kodi.SendAsync("Files.GetDirectory",
+                new JsonObject { ["directory"] = dir, ["media"] = "video" });
+        }
+        catch (KodiException)
+        {
+            return;
+        }
+
+        var doc = JsonNode.Parse(raw)?.AsObject();
+        var files = doc?["files"]?.AsArray();
+        if (files is null)
+            return;
+
+        foreach (var file in files)
+        {
+            if (file is null) continue;
+
+            var label = file["label"]?.GetValue<string>();
+            var filetype = file["filetype"]?.GetValue<string>();
+
+            if (label?.Contains(query, StringComparison.OrdinalIgnoreCase) == true)
+                results.Add(file);
+
+            if (filetype == "directory" && depth < maxDepth)
+            {
+                var path = file["file"]?.GetValue<string>();
+                if (path is not null)
+                    await CollectMatching(kodi, path, query, depth + 1, maxDepth, results);
+            }
+        }
     }
 }

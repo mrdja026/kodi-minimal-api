@@ -22,7 +22,7 @@ builder.Services.Configure<KodiOptions>(
 
 builder.Services.AddHttpClient<IKodiService, KodiService>(client =>
 {
-    client.Timeout = TimeSpan.FromSeconds(5);
+    client.Timeout = TimeSpan.FromSeconds(30);
 });
 
 builder.Services.AddValidatorsFromAssemblyContaining<VolumeRequestValidator>();
@@ -60,6 +60,10 @@ app.Run();
 [JsonSerializable(typeof(TVShowEpisodes))]
 [JsonSerializable(typeof(TVShowRecent))]
 [JsonSerializable(typeof(TVShowPlayEpisode))]
+[JsonSerializable(typeof(TVShowScan))]
+[JsonSerializable(typeof(MovieSearchDir))]
+[JsonSerializable(typeof(TVShowSearchDir))]
+[JsonSerializable(typeof(TVSearchAll))]
 [JsonSerializable(typeof(FilesDirectoryRequest))]
 [JsonSerializable(typeof(FilesSourcesRequest))]
 [JsonSerializable(typeof(SystemPropertiesRequest))]

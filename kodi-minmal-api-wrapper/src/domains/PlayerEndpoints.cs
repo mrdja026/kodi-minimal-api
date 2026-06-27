@@ -26,6 +26,13 @@ public static class PlayerEndpoints
 
             try
             {
+                if (command is PlayerPlay { File: not null } playFile)
+                {
+                    var openResult = await kodi.SendAsync("Player.Open",
+                        new JsonObject { ["item"] = new JsonObject { ["file"] = playFile.File } });
+                    return Results.Text(openResult, "application/json");
+                }
+
                 var activePlayersJson = await kodi.SendAsync("Player.GetActivePlayers", null);
                 var players = JsonNode.Parse(activePlayersJson)?.AsArray();
 
@@ -57,6 +64,13 @@ public static class PlayerEndpoints
             {
                 return Results.Json(
                     new KodiProxyError("Kodi Unreachable", "Could not connect. Ensure Kodi is running and host/port in appsettings.json are correct.", 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+            catch (OperationCanceledException)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Timeout", "Request timed out. Ensure Kodi is running and reachable at the configured host/port.", 502),
                     AppJsonSerializerContext.Default.KodiProxyError,
                     statusCode: StatusCodes.Status502BadGateway);
             }

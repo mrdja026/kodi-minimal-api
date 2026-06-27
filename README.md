@@ -240,3 +240,5 @@ Invoke-RestMethod -Method Post -Body '{"method":"VideoLibrary.GetMovies","params
 - Kodi's `Application.SetVolume` and `Application.GetProperties` use the system audio level, which can lag or report stale values.
 - Rapid-fire UP/DOWN commands may be batched or dropped by Kodi's event loop.
 - The volume level reported by `GET` may not match the actual system level if Kodi is still processing a previous `SET`/`UP`/`DOWN`. Add a 200-300ms delay between consecutive volume commands for more reliable results.
+- Moviews scan works (90%) JSON RCP is flaky
+- TV_Shows needs metadata that is out my controll and it needs to be Series Name -> Season X - > SeriesName.S01E01.ext, and even that does not guarantee

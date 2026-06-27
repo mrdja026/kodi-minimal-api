@@ -133,7 +133,14 @@ public static class SystemEndpoints
             catch (HttpRequestException)
             {
                 return Results.Json(
-                    new KodiProxyError("Kodi Unreachable", "Could not connect to Kodi.", 502),
+                    new KodiProxyError("Kodi Unreachable", "Could not connect. Ensure Kodi is running and host/port in appsettings.json are correct.", 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+            catch (OperationCanceledException)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Timeout", "Request timed out. Ensure Kodi is running and reachable at the configured host/port.", 502),
                     AppJsonSerializerContext.Default.KodiProxyError,
                     statusCode: StatusCodes.Status502BadGateway);
             }

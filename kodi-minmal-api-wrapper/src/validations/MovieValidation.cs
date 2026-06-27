@@ -52,6 +52,15 @@ public class MovieScanTVValidator : AbstractValidator<MovieScanTV>
 {
 }
 
+public class MovieSearchDirValidator : AbstractValidator<MovieSearchDir>
+{
+    public MovieSearchDirValidator()
+    {
+        When(x => x.Query is not null, () => RuleFor(x => x.Query).NotEmpty());
+        When(x => x.Directory is not null, () => RuleFor(x => x.Directory).NotEmpty());
+    }
+}
+
 public class MovieRequestValidator : AbstractValidator<CommandValue>
 {
     public MovieRequestValidator()
@@ -65,6 +74,7 @@ public class MovieRequestValidator : AbstractValidator<CommandValue>
             _ = v.Add(new MovieScanValidator());
             _ = v.Add(new MovieScanMoviesValidator());
             _ = v.Add(new MovieScanTVValidator());
+            _ = v.Add(new MovieSearchDirValidator());
         });
     }
 }

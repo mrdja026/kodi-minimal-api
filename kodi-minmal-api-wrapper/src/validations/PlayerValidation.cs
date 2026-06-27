@@ -5,6 +5,10 @@ namespace KodiMinimalApi.Validators;
 
 public class PlayerPlayValidator : AbstractValidator<PlayerPlay>
 {
+    public PlayerPlayValidator()
+    {
+        When(x => x.File is not null, () => RuleFor(x => x.File).NotEmpty());
+    }
 }
 
 public class PlayerPauseValidator : AbstractValidator<PlayerPause>
