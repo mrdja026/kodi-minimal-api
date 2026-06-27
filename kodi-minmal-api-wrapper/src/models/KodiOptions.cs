@@ -6,4 +6,5 @@ public class KodiOptions
     public int Port { get; set; } = 8080;
     public string? Username { get; set; } = "kodi";
     public string? Password { get; set; } = "1233";
+
 }

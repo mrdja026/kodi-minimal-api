@@ -26,11 +26,16 @@ public static class VolumeEndpoints
 
             try
             {
+                if (command is VolumeGet)
+                {
+                    var raw = await kodi.SendAsync("Application.GetProperties",
+                        new JsonObject { ["properties"] = new JsonArray((JsonNode?)JsonValue.Create("volume")) });
+                    var volume = JsonNode.Parse(raw)?["volume"]?.GetValue<int>() ?? 0;
+                    return Results.Json(volume, AppJsonSerializerContext.Default.Int32);
+                }
+
                 var result = command switch
                 {
-                    VolumeGet => await kodi.SendAsync("Application.GetProperties",
-                        new JsonObject { ["properties"] = new JsonArray((JsonNode?)JsonValue.Create("volume")) }),
-
                     VolumeSet set => await kodi.SendAsync("Application.SetVolume",
                         new JsonObject { ["volume"] = set.Level }),
 

@@ -34,6 +34,8 @@ app.MapVolumeEndpoints();
 app.MapFileEndpoints();
 app.MapSystemEndpoints();
 app.MapPlayerEndpoints();
+app.MapMovieEndpoints();
+app.MapTVShowEndpoints();
 
 app.Run();
 
@@ -45,13 +47,29 @@ app.Run();
 [JsonSerializable(typeof(PlayerPlay))]
 [JsonSerializable(typeof(PlayerPause))]
 [JsonSerializable(typeof(PlayerStop))]
+[JsonSerializable(typeof(MovieList))]
+[JsonSerializable(typeof(MovieSearch))]
+[JsonSerializable(typeof(MovieRecent))]
+[JsonSerializable(typeof(MoviePlay))]
+[JsonSerializable(typeof(MovieScan))]
+[JsonSerializable(typeof(MovieScanMovies))]
+[JsonSerializable(typeof(MovieScanTV))]
+[JsonSerializable(typeof(TVShowList))]
+[JsonSerializable(typeof(TVShowSearch))]
+[JsonSerializable(typeof(TVShowSeasons))]
+[JsonSerializable(typeof(TVShowEpisodes))]
+[JsonSerializable(typeof(TVShowRecent))]
+[JsonSerializable(typeof(TVShowPlayEpisode))]
 [JsonSerializable(typeof(FilesDirectoryRequest))]
+[JsonSerializable(typeof(FilesSourcesRequest))]
 [JsonSerializable(typeof(SystemPropertiesRequest))]
 [JsonSerializable(typeof(SystemActionRequest))]
+[JsonSerializable(typeof(KodiRawRequest))]
 [JsonSerializable(typeof(KodiProxyError))]
 [JsonSerializable(typeof(KodiActionResult))]
 [JsonSerializable(typeof(ValidationError))]
 [JsonSerializable(typeof(ValidationError[]))]
+[JsonSerializable(typeof(int))]
 internal partial class AppJsonSerializerContext : JsonSerializerContext
 {
 }

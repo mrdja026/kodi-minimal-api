@@ -9,6 +9,7 @@ namespace KodiMinimalApi.Features;
 
 public record SystemPropertiesRequest(string[] Properties);
 public record SystemActionRequest(bool Confirm);
+public record KodiRawRequest(string Method, JsonElement? Params);
 
 public static class SystemEndpoints
 {
@@ -102,6 +103,37 @@ public static class SystemEndpoints
             {
                 return Results.Json(
                     new KodiProxyError("Kodi Unreachable", "Could not connect. Ensure Kodi is running and host/port in appsettings.json are correct.", 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+            catch (KodiException ex)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Error", ex.Message, 502),
+                    AppJsonSerializerContext.Default.KodiProxyError,
+                    statusCode: StatusCodes.Status502BadGateway);
+            }
+        });
+
+        var debugApi = app.MapGroup("/api/debug");
+
+        debugApi.MapPost("/kodi", async (
+            KodiRawRequest request,
+            IKodiService kodi
+        ) =>
+        {
+            try
+            {
+                var jsonParams = request.Params is null
+                    ? null
+                    : JsonNode.Parse(request.Params?.GetRawText() ?? "null");
+                var result = await kodi.SendAsync(request.Method, jsonParams);
+                return Results.Text(result, "application/json");
+            }
+            catch (HttpRequestException)
+            {
+                return Results.Json(
+                    new KodiProxyError("Kodi Unreachable", "Could not connect to Kodi.", 502),
                     AppJsonSerializerContext.Default.KodiProxyError,
                     statusCode: StatusCodes.Status502BadGateway);
             }
